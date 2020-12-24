@@ -11,7 +11,7 @@
 #define MAX 1024
 #define PORT 8080
 #define SA struct sockaddr
-
+char darr[MAX][MAX],retmessage[111];
 void decrypt(char *str, char *q){
 
 	int   n=0;
@@ -39,34 +39,155 @@ void decrypt(char *str, char *q){
 	}
 	*(q+n)='\0';
 	n++;
+	
+	
 
+}
 
+/*void trans_decrypt(char *str, char *q,int l)
+{
+	char temp[MAX],temp2[MAX],key[MAX];
+	int rows,k,r,i,j,klen,c,index;
+	char *p=str;
+	
+	printf("Enter key\n");
+	//fflush(stdin);
+	fgets(key,MAX,stdin);
+	strcpy(temp,key);
+	klen = strlen(key)-1;
+	rows=l/klen;
+	rows;
+	j=0;
+	for (i=0,k=1;*(p + i)!=NULL;i++,k++) {
+		//printf("\nEmlen=%d",emlen); 
+		temp2[j++]=*(p+i);
+		if((k%rows)==0) {
+			temp2[j]='\0';
+			index=findMin(temp);
+			makeArray(index,rows,temp2);
+			j=0;
+		}
+	}
+	
+	k=0;
+	r=3;
+	c=6;
+	for (i=0;i<3;i++) {
+		for (j=0;j<c;j++) {
+			printf("%c ",darr[i][j]);
+			//retrieving message 
+			*(q+k)=darr[i][j];
+			k++;
+		}
+		printf("\n");
+	}
+	*(q+k)='\0';
+	printf("\nMessage retrieved is\n");
+	for (i=0;*(q+i)!=NULL;i++) 
+	     printf("%c",*(q+i));
+}
 
+void makeArray(int col,int row,char *temp2) {
+	int i,j;
+	for (i=0;i<row;i++) {
+		darr[i][col]=*(temp2+i);
+	}
+}
+int findMin(char *temp) {
+	int i,j,min,index;
+	min=*(temp);
+	index=0;
+	for (j=0;*(temp+j)!=NULL;j++) {
+		if(*(temp+j)<min) {
+			min=*(temp+j);
+			index=j;
+		}
+	}
+	temp[index]=123;
+	return(index);
+}*/
+void decryptMsg(char *str, int l){
+    int  i, j, k = -1, row = 0, col = 0, m = 0,key = 3;
+    char railMatrix[key][l];
+ 
+    for(i = 0; i < key; ++i)
+        for(j = 0; j < l; ++j)
+            railMatrix[i][j] = '\n';
+ 
+    for(i = 0; i < l; ++i){
+        railMatrix[row][col++] = '*';
+ 
+        if(row == 0 || row == key-1)
+            k= k * (-1);
+ 
+        row = row + k;
+    }
+ 
+    for(i = 0; i < key; ++i)
+        for(j = 0; j < l; ++j)
+            if(railMatrix[i][j] == '*'){
+                railMatrix[i][j] = *(str + m);
+                m++;
+                }
+ 
+    row = col = 0;
+    k = -1;
+ 
+    printf("\nDecrypted Message: ");
+  int x=0;
+    for(i = 0; i < l; ++i){
+        printf("%c",railMatrix[row][col++]);
+ 
+        if(row == 0 || row == key-1)
+            k= k * (-1);
+ 
+        row = row + k;
+        
+    }
+   
 }
 void func(int sockfd) {
 	char buff[MAX],q[MAX];
-	int n,l;
+	int n,l,x;
 	while (1) {
 		bzero(buff, MAX);
 		read(sockfd, buff, sizeof(buff));
 		printf("\nEncrypted Data From client: %s\t ", buff);
 		l=strlen(buff);
-		decrypt(buff,q);
+		printf("\nSelect the type of encryption\n");
+		scanf("%d",&x);
 		
-		printf("\nDecrypted data is: %s\t ",q);
-		
-		//write(sockfd,buff, sizeof(buff));
-		
-		bzero(buff, MAX);
-		n = 0;
-		printf("\nTo client: ");
-		while ((buff[n++] = getchar()) != '\n') ;
-		write(sockfd, buff, sizeof(buff));
+		switch(x){
+			case 1: decrypt(buff,q);
+				printf("\nDecrypted data is: %s\t ",q);
+				bzero(buff, MAX);
+				n = 0;
+				printf("\nTo client: ");
+				while ((buff[n++] = getchar()) != '\n') ;
+				write(sockfd, buff, sizeof(buff));
 
-		if (strncmp("exit", buff, 4) == 0) {
-			printf("Server Exit.\n");
-			break;
-		}
+				if (strncmp("exit", buff, 4) == 0) {
+					printf("Server Exit.\n");
+					break;
+				}
+				break;
+			case 2: decryptMsg(buff,l);
+				bzero(buff, MAX);
+				n = 0;
+				printf("\nTo client: ");
+				while ((buff[n++] = getchar()) != '\n') ;
+				write(sockfd, buff, sizeof(buff));
+
+				if (strncmp("exit", buff, 4) == 0) {
+					printf("Server Exit.\n");
+					break;
+				}
+				break;
+			default: printf("Wrong input");
+			}
+		
+		
+		
 	}
 }
 

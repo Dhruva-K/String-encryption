@@ -40,10 +40,108 @@ void encrypt(char *str,char *q){
 	*(q+n)='\0';
 	n++;
 }
+/*void transposition(char *str, char *q){
+	int i,j,klen,emlen,flag=0;
+	int r,c,index,min,rows;
+	char temp[55],arr[22][22],key[MAX];
+	char *p=str;
+	
+	printf("Enter key\n");
+	//fflush(stdin);
+	fgets(key,MAX,stdin);
+	key[strlen(key)]='\0';
+	strcpy(temp,key);
+	klen = strlen(key)-1;
+	//printf("\n%d",klen);
+	int k =0;
+	for (i=0; ;i++) {
+		if(flag==1) 
+		    break;
+		for (j=0;j<5;j++) {
+			if(*(p+k)==NULL) {
+				flag=1;
+				arr[i][j]='-';
+			} else {
+				arr[i][j]=*(p+k);
+				//printf("%d %c",j,key[j]);
+				k++;
+			}
+		}
+	}
+	r=i;
+	c=j;
+	printf("%d %d",r,c);
+	for (i=0;i<r;i++) {
+		for (j=0;j<c;j++) {
+			printf("%c ",arr[i][j]);
+		}
+		printf("\n");
+	}
+	k=0;
+	for (i=0;i<klen;i++) {
+		index=findMin(temp);
+		//cipher(index,r);
+		for(j=0;j<r;j++)
+		{
+			*(q+k)=arr[j][index];
+			k++;
+		}
+	}
+	*(q+k) = '\0';
+	/*printf("\nEncrypted message is\n");
+	for (i=0;*(q+i)!=NULL;i++) 
+	   printf("%c",*(q+i));
+	printf("\n\n");
+	
+}
 
+
+
+int findMin(char *temp) {
+	int i,j,min,index;
+	min=*(temp);
+	index=0;
+	for (j=0;*(temp+j)!=NULL;j++) {
+		if(*(temp+j)<min) {
+			min=*(temp+j);
+			index=j;
+		}
+	}
+	*(temp+index)=123;
+	return(index);
+}*/
+void encryptMsg(char *str, char *q,int l){
+    int  i, j, k = -1, row = 0, col = 0,key = 3,x;
+    char railMatrix[key][l];
+ 
+    for(i = 0; i < key; ++i)
+        for(j = 0; j < l; ++j)
+            railMatrix[i][j] = '\n';
+ 
+    for(i = 0; i < l; ++i){
+        railMatrix[row][col++] = *(str +i);
+ 
+        if(row == 0 || row == key-1)
+            k= k * (-1);
+ 
+        row = row + k;
+    }
+    x=0;
+    //printf("\nEncrypted Message: ");
+ 	
+    for(i = 0; i < key; ++i){
+        for(j = 0; j < l; ++j){
+            if(railMatrix[i][j] != '\n'){
+                *(q+x)=railMatrix[i][j];
+                x++;
+                }
+          }
+    }
+    *(q+x) = '\0';
+}
 void func(int sockfd) {
 	char buff[MAX],q[MAX];
-	int n,l;
+	int n,l,x;
 	while (1) {
 		bzero(buff, sizeof(buff));
 		printf("Enter a string : ");
@@ -51,18 +149,54 @@ void func(int sockfd) {
 		//while((buff[n++] = getchar()) != '\n') ;
 		fgets(buff,MAX,stdin);
 		l=strlen(buff)-1;
-		encrypt(buff,q);
-		//printf("Encrypted text is -> %s",q);
-		write(sockfd, q, sizeof(q));
-		bzero(buff, sizeof(buff));
-		bzero(q, sizeof(q));
-		read(sockfd, buff, sizeof(buff));
-		printf("From server : %s", buff);
+		printf("\nSelect the type of encryption\n");
+		printf("Press 1 for caesar encryption\n");
+		printf("Press 2 for Rail fence encryption\n");
+		scanf("%d",&x);
+		/*switch(x){
+			case 1: encrypt(buff,q);
+				write(sockfd, q, sizeof(q));
+				bzero(buff, sizeof(buff));
+				bzero(q, sizeof(q));
+				read(sockfd, buff, sizeof(buff));
+				printf("From server : %s", buff);
 
-		if (strncmp(buff, "exit", 4) == 0) {
-			printf("Client Exit.\n");
-			break;
-		}
+				if (strncmp(buff, "exit", 4) == 0) {
+					printf("Client Exit.\n");
+					break;
+				}
+				break;
+			case 2: encryptMsg(buff,q,l);
+				write(sockfd, q, sizeof(q));
+				bzero(buff, sizeof(buff));
+				bzero(q, sizeof(q));
+				read(sockfd, buff, sizeof(buff));
+				printf("From server : %s", buff);
+
+				if (strncmp(buff, "exit", 4) == 0) {
+					printf("Client Exit.\n");
+					break;
+				}
+				break;*/
+			//}
+			if(x==1){
+			encrypt(buff,q);
+			}
+			else if(x==2){
+			encryptMsg(buff,q,l);
+			}
+			write(sockfd, q, sizeof(q));
+				bzero(buff, sizeof(buff));
+				bzero(q, sizeof(q));
+				read(sockfd, buff, sizeof(buff));
+				printf("From server : %s", buff);
+
+				if (strncmp(buff, "exit", 4) == 0) {
+					printf("Client Exit.\n");
+					break;
+				}
+		
+		
 	}
 }
 
